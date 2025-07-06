@@ -6,30 +6,29 @@ const int AMPLITUDE = 28000;      // Äänenvoimakkuus
 const int SAMPLE_RATE = 44100;    // Näytteenottotaajuus (Hz)
 const double FREQUENCY = 441.0; // Taajuus Hz
 
-// Äänipuskuriin kirjoittava callback-funktio
+// Syntetisoi siniaallon näytteet puskuriin
 void sine_wave_callback(void *user_data, Uint8 *raw_buffer, int bytes)
-{   
-    Sint16 *buffer = (Sint16*)raw_buffer;         // Muutetaan puskurin tyyppi 16-bittiseksi
-    int length = bytes / 2;                       // Lasketaan näytteiden määrä (2 tavua per näyte)
-    int &sample_nr = *(int*)user_data;            // Haetaan nykyinen näytenumero käyttäjädatan kautta
+{
+    auto buffer = reinterpret_cast<Sint16*>(raw_buffer); // 16-bittinen puskurimuoto
+    int length = bytes / sizeof(Sint16);                 // Näytteiden määrä
+    int &sample_nr = *reinterpret_cast<int*>(user_data); // Näytenumero viitteenä
 
-    for(int i = 0; i < length; i++, sample_nr++)  // Käydään puskuri läpi näyte kerrallaan
-    {
-        double time = (double)sample_nr / (double)SAMPLE_RATE; // Lasketaan aika sekunteina
-        buffer[i] = (Sint16)(AMPLITUDE * sin(2.0 * M_PI * FREQUENCY * time)); // Käytetään muuttujaa
+    for(int i = 0; i < length; ++i, ++sample_nr) {
+        double t = static_cast<double>(sample_nr) / SAMPLE_RATE;
+        buffer[i] = static_cast<Sint16>(AMPLITUDE * sin(2.0 * M_PI * FREQUENCY * t));
     }
 }
 
+// Syntetisoi kanttiaallon näytteet puskuriin
 void square_wave_callback(void *user_data, Uint8 *raw_buffer, int bytes)
 {
-    Sint16 *buffer = (Sint16*)raw_buffer;         // Muutetaan puskurin tyyppi 16-bittiseksi
-    int length = bytes / 2;                       // Lasketaan näytteiden määrä (2 tavua per näyte)
-    int &sample_nr = *(int*)user_data;            // Haetaan nykyinen näytenumero käyttäjädatan kautta
+    auto buffer = reinterpret_cast<Sint16*>(raw_buffer);
+    int length = bytes / sizeof(Sint16);
+    int &sample_nr = *reinterpret_cast<int*>(user_data);
 
-    for(int i = 0; i < length; i++, sample_nr++)  // Käydään puskuri läpi näyte kerrallaan
-    {
-        double time = (double)sample_nr / (double)SAMPLE_RATE; // Lasketaan aika sekunteina
-        buffer[i] = (Sint16)(AMPLITUDE * (sin(2.0 * M_PI * FREQUENCY * time) >= 0 ? 1 : -1)); // Käytetään muuttujaa
+    for(int i = 0; i < length; ++i, ++sample_nr) {
+        double t = static_cast<double>(sample_nr) / SAMPLE_RATE;
+        buffer[i] = static_cast<Sint16>(AMPLITUDE * (sin(2.0 * M_PI * FREQUENCY * t) >= 0 ? 1 : -1));
     }
 }
 
