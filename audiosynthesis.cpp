@@ -1,6 +1,5 @@
 #include "SDL2/SDL.h"
 #include "SDL2/SDL_audio.h"
-#include <cmath>
 #include <math.h>
 
 const int AMPLITUDE = 28000;      // Äänenvoimakkuus
@@ -51,14 +50,8 @@ int main() {
     // Käyttäjädatan osoite on asetettu näytenumeroon, jotta callback voi käyttää sitä
     // Käytetään SDL:n audio API
 
-    SDL_AudioSpec obtained_specification;                               // Saadut audiospesifikaatiot
-    obtained_specification.freq = SAMPLE_RATE;                          // Näytteenottotaajuus
-    obtained_specification.format = AUDIO_S16SYS;                       // 16-bittinen signed
-    obtained_specification.channels = 1;                                // Mono
-    obtained_specification.samples = 2048;                              // Puskurin koko
-    obtained_specification.callback = sine_wave_callback;               // Callback-funktio
-    obtained_specification.userdata = nullptr;                          // Ei käyttäjädatan osoitetta
-
+    SDL_AudioSpec obtained_specification;                               // Saadut audiospesifikaatiot // Ei tarvitse alustaa kenttiä
+    
     SDL_AudioSpec desired_specification;                                // Halutut audiospesifikaatiot
     desired_specification.freq = SAMPLE_RATE;                           // Näytteenottotaajuus
     desired_specification.format = AUDIO_S16SYS;                        // 16-bittinen signed näyte
