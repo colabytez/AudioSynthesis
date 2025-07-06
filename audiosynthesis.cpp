@@ -4,6 +4,7 @@
 
 const int AMPLITUDE = 28000;      // Äänenvoimakkuus
 const int SAMPLE_RATE = 44100;    // Näytteenottotaajuus (Hz)
+const double FREQUENCY = 441.0; // Taajuus Hz
 
 // Äänipuskuriin kirjoittava callback-funktio
 void sine_wave_callback(void *user_data, Uint8 *raw_buffer, int bytes)
@@ -15,7 +16,7 @@ void sine_wave_callback(void *user_data, Uint8 *raw_buffer, int bytes)
     for(int i = 0; i < length; i++, sample_nr++)  // Käydään puskuri läpi näyte kerrallaan
     {
         double time = (double)sample_nr / (double)SAMPLE_RATE; // Lasketaan aika sekunteina
-        buffer[i] = (Sint16)(AMPLITUDE * sin(2.0 * M_PI * 441.0 * time)); // 441 Hz siniaalto
+        buffer[i] = (Sint16)(AMPLITUDE * sin(2.0 * M_PI * FREQUENCY * time)); // Käytetään muuttujaa
     }
 }
 
@@ -28,18 +29,18 @@ void square_wave_callback(void *user_data, Uint8 *raw_buffer, int bytes)
     for(int i = 0; i < length; i++, sample_nr++)  // Käydään puskuri läpi näyte kerrallaan
     {
         double time = (double)sample_nr / (double)SAMPLE_RATE; // Lasketaan aika sekunteina
-        buffer[i] = (Sint16)(AMPLITUDE * (sin(2.0 * M_PI * 441.0 * time) >= 0 ? 1 : -1)); // Neliöaalto, joka vaihtuu 1:stä -1:ään
+        buffer[i] = (Sint16)(AMPLITUDE * (sin(2.0 * M_PI * FREQUENCY * time) >= 0 ? 1 : -1)); // Käytetään muuttujaa
     }
 }
 
 int main() {
 
-    if(SDL_Init(SDL_INIT_AUDIO) < 0) {                                    // Alustetaan SDL
-        SDL_Log("SDL:n alustus epäonnistui: %s", SDL_GetError());
+    if(SDL_Init(SDL_INIT_AUDIO) < 0) {                                  // Alustetaan SDL
+        SDL_Log("SDL:n alustus epäonnistui: %s", SDL_GetError());       // Virheviesti
         return -1;                                                      // Lopetetaan, jos epäonnistuu
     }
 
-    int sample_nr = 0;                                               // Näytenumero, jota käytetään callbackissa
+    int sample_nr = 0;                                                  // Näytenumero, jota käytetään callbackissa
 
     // Määritellään audiospesifikaatiot, joita käytetään äänen toistossa
     // Saadut audiospesifikaatiot määrittävät, miten ääni toistetaan
@@ -75,7 +76,7 @@ int main() {
     SDL_CloseAudio();
 
     // Vaihdetaan callback-funktio siniaallon tuottamiseen
-    desired_specification.callback = square_wave_callback;        // Vaihdetaan callback-funktio
+    desired_specification.callback = square_wave_callback;  // Vaihdetaan callback-funktio
     sample_nr = 0;                                          // Nollataan näytenumero
     if(SDL_OpenAudio(&desired_specification, &obtained_specification) < 0) { 
         SDL_Log("Audiolaitteen uudelleen avaaminen epäonnistui: %s", SDL_GetError());
