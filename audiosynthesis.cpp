@@ -6,15 +6,15 @@ const int AMPLITUDE = 28000;      // Äänenvoimakkuus
 const int SAMPLE_RATE = 44100;    // Näytteenottotaajuus (Hz)
 
 // Äänipuskuriin kirjoittava callback-funktio
-void audio_callback(void *user_data, Uint8 *raw_buffer, int bytes)
+void sine_wave_callback(void *user_data, Uint8 *raw_buffer, int bytes)
 {   
     Sint16 *buffer = (Sint16*)raw_buffer;         // Muutetaan puskurin tyyppi 16-bittiseksi
     int length = bytes / 2;                       // Lasketaan näytteiden määrä (2 tavua per näyte)
-    int &sample_number = *(int*)user_data;            // Haetaan nykyinen näytenumero käyttäjädatan kautta
+    int &sample_nr = *(int*)user_data;            // Haetaan nykyinen näytenumero käyttäjädatan kautta
 
-    for(int i = 0; i < length; i++, sample_number++)  // Käydään puskuri läpi näyte kerrallaan
+    for(int i = 0; i < length; i++, sample_nr++)  // Käydään puskuri läpi näyte kerrallaan
     {
-        double time = (double)sample_number / (double)SAMPLE_RATE; // Lasketaan aika sekunteina
+        double time = (double)sample_nr / (double)SAMPLE_RATE; // Lasketaan aika sekunteina
         buffer[i] = (Sint16)(AMPLITUDE * sin(2.0 * M_PI * 441.0 * time)); // 441 Hz siniaalto
     }
 }
@@ -23,11 +23,11 @@ void square_wave_callback(void *user_data, Uint8 *raw_buffer, int bytes)
 {
     Sint16 *buffer = (Sint16*)raw_buffer;         // Muutetaan puskurin tyyppi 16-bittiseksi
     int length = bytes / 2;                       // Lasketaan näytteiden määrä (2 tavua per näyte)
-    int &sample_number = *(int*)user_data;            // Haetaan nykyinen näytenumero käyttäjädatan kautta
+    int &sample_nr = *(int*)user_data;            // Haetaan nykyinen näytenumero käyttäjädatan kautta
 
-    for(int i = 0; i < length; i++, sample_number++)  // Käydään puskuri läpi näyte kerrallaan
+    for(int i = 0; i < length; i++, sample_nr++)  // Käydään puskuri läpi näyte kerrallaan
     {
-        double time = (double)sample_number / (double)SAMPLE_RATE; // Lasketaan aika sekunteina
+        double time = (double)sample_nr / (double)SAMPLE_RATE; // Lasketaan aika sekunteina
         buffer[i] = (Sint16)(AMPLITUDE * (sin(2.0 * M_PI * 441.0 * time) >= 0 ? 1 : -1)); // Neliöaalto, joka vaihtuu 1:stä -1:ään
     }
 }
@@ -75,7 +75,7 @@ int main() {
     SDL_CloseAudio();
 
     // Vaihdetaan callback-funktio siniaallon tuottamiseen
-    desired_specification.callback = audio_callback;        // Vaihdetaan callback-funktio
+    desired_specification.callback = square_wave_callback;        // Vaihdetaan callback-funktio
     sample_nr = 0;                                          // Nollataan näytenumero
     if(SDL_OpenAudio(&desired_specification, &obtained_specification) < 0) { 
         SDL_Log("Audiolaitteen uudelleen avaaminen epäonnistui: %s", SDL_GetError());
